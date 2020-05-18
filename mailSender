@@ -1,0 +1,73 @@
+import pymysql
+import sqlalchemy
+import pandas as pd
+import sqlparse as prs
+import os
+import smtplib
+from email.message import EmailMessage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+def send_mail(temporaryVARIABLE, toaddress):
+    sender = "patientmonitor272@gmail.com" #Email address email is sent from
+    toaddr =  toaddress #Email address(es) email is sent to
+    msg = MIMEMultipart()
+    msg['From'] = sender
+    msg['To'] = toaddr
+    msg['Subject'] = "Alert: Emergency"
+    body = "CRITICAL ALERT EMAIL BEING SENT TO YOU"
+    msg.attach(MIMEText(body,"plain"))
+    server = smtplib.SMTP('smtp.gmail.com',587)
+    server.starttls()
+    server.login(sender, "patientmonitor21")
+    text = msg.as_string()
+    server.sendmail(sender,toaddr,text)
+    server.quit()
+
+//conn = pymysql.connect(host="",user="",password="",db="capstone")
+//code commented out due to needing specific credentials for Xampp
+
+myCursor = conn.cursor() #Cursor provides functionality, allows query access in Python
+
+//myCursor.execute("""CREATE TABLE test
+//    (
+//    id int primary key not null,
+//    altitude float(8),
+//    airPressure float(8),
+//    temp float(8) not null,
+//    pulse float(8),
+//    startTime timestamp not null,
+//    email varchar(255)
+//    )
+ //   """)
+
+count = 0
+counter_id = 0
+criticalVAL = 900
+
+while(count != -1):
+    altitudeIn = input("Enter altitude: ")
+    print("Altitude: ", altitudeIn)
+    airPressureIn = input("Enter Air Pressure: ")
+    print("Air Pressure: ", airPressureIn)
+    tempIn = input("Enter Temperature: ")
+    print("Temperature: ", tempIn)
+    pulseIn = input("Enter Pulse: ")
+    print("Pulse: ", pulseIn)
+    emailIn = input('Enter email: ')
+    print("Email: ", emailIn)
+    myCursor.execute("INSERT INTO logs(id, altitude, airPressure, temp, pulse, email) VALUES(%s, %s, %s, %s, %s, %s);", (str(counter_id+1), altitudeIn, airPressureIn, tempIn, pulseIn, emailIn))
+    print('Logged into Database!')
+    counter_id = counter_id + 1
+    if float(tempIn) >= criticalVAL:
+        send_mail(float(tempIn),emailIn)
+        print('Emergency')
+        print("Email Sent!")
+    else:
+        print("No emergency and no email sent!")
+    print("NEXT DATABASE TO BE ADDED!")
+    conn.commit()
+
+
+conn.close()
+
